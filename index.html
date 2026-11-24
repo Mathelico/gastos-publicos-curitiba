@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gastos públicos de Curitiba | Etapa 3</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #f6f7f2;
+    --ink: #152922;
+    --muted: #52645c;
+    --line: #dce4db;
+    --health: #146656;
+    --education: #3477a1;
+    --transport: #a65f16;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; color: var(--ink); background: var(--paper); }
+  h1, h2, p, figure { margin: 0; }
+  a { color: #146656; text-underline-offset: .24em; }
+  button, select { font: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid #b96817; outline-offset: 4px; }
+  .shell { width: min(1160px, calc(100% - 64px)); margin-inline: auto; }
+  header { background: #10362d; color: white; }
+  .hero { padding: 34px 0 40px; }
+  .eyebrow { color: #bfe8d3; font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .13em; }
+  h1 { max-width: 820px; margin: 14px 0 10px; font-size: clamp(2.1rem, 5vw, 3.55rem); line-height: 1.03; letter-spacing: -.045em; }
+  .hero p:last-child { color: #dbebe1; max-width: 600px; line-height: 1.5; }
+  main { padding-block: 22px 36px; }
+  .filters { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin-bottom: 19px; }
+  .filters label { display: grid; gap: 7px; font-size: .83rem; font-weight: 700; }
+  select, .reset { color: var(--ink); background: white; border: 1px solid #ccd9d0; border-radius: 9px; min-height: 44px; padding: 8px 12px; }
+  .reset:hover, select:hover { border-color: var(--health); }
+  .metrics { display: grid; grid-template-columns: 1.45fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .metric, .panel { background: white; border: 1px solid var(--line); border-radius: 15px; }
+  .metric { min-width: 0; padding: 17px 18px; }
+  .metric:first-child { background: #e6f2e9; border-color: #cfe3d4; }
+  .metric span { display: block; color: var(--muted); font-size: .83rem; font-weight: 650; }
+  .metric strong { display: block; margin-top: 5px; font-size: clamp(1.12rem, 2.25vw, 1.65rem); line-height: 1.3; letter-spacing: -.04em; }
+  .grid { display: grid; grid-template-columns: minmax(0,1.75fr) minmax(0,1fr); gap: 16px; align-items: stretch; }
+  .panel { padding: 22px; min-width: 0; }
+  h2 { font-size: 1.18rem; letter-spacing: -.02em; }
+  .sub { margin-top: 5px; font-size: .86rem; color: var(--muted); line-height: 1.5; }
+  .legend { display: flex; flex-wrap: wrap; gap: 9px 16px; margin-block: 14px 8px; }
+  .legend span { display: inline-flex; gap: 6px; align-items: center; font-size: .78rem; }
+  .swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+  .health { background: var(--health); }
+  .education { background: var(--education); }
+  .transport { background: var(--transport); }
+  .chart { display: grid; grid-template-columns: auto minmax(0,1fr); }
+  .scale { position: relative; width: 2.3rem; height: 185px; color: var(--muted); font-size: .71rem; white-space: nowrap; }
+  .scale span { position: absolute; right: 7px; transform: translateY(-50%); }
+  .plot { position: relative; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+  .gridlines { pointer-events: none; position: absolute; height: 185px; inset: 0 0 auto; display: flex; flex-direction: column; justify-content: space-between; }
+  .gridlines span { display: block; border-top: 1px solid var(--line); }
+  .month { position: relative; min-width: 0; padding: 0; border: 0; border-radius: 5px; color: var(--ink); background: transparent; }
+  .bar-space { position: relative; height: 185px; display: flex; align-items: end; justify-content: center; }
+  .stack { display: flex; flex-direction: column-reverse; width: 63%; max-width: 94px; border-radius: 6px 6px 0 0; overflow: hidden; }
+  .month:hover .stack { filter: brightness(1.14); }
+  .month[aria-pressed="true"] .month-name { color: var(--health); font-weight: 800; text-decoration: underline; text-underline-offset: 4px; }
+  .month[data-dim="true"] .stack { opacity: .32; }
+  .month-name { display: block; margin-top: 10px; font-size: .84rem; }
+  .point-value { display: block; position: absolute; padding: 3px 4px; background: white; border-radius: 3px; font-size: .71rem; font-weight: 750; white-space: nowrap; }
+  .composition { list-style: none; padding: 0; margin: 19px 0 0; display: grid; gap: 16px; }
+  .rank-label { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; color: var(--ink); font-size: .83rem; line-height: 1.35; }
+  .rank-label strong { white-space: nowrap; }
+  .rail { height: 7px; margin-top: 6px; border-radius: 10px; background: #edf1ed; overflow: hidden; }
+  .rail span { display: block; height: 100%; border-radius: inherit; background: var(--health); }
+  .rank-value { margin-top: 3px; text-align: right; color: var(--muted); font-size: .76rem; }
+  .rank-area { display: block; color: var(--muted); font-size: .76rem; }
+  .full { margin-top: 16px; }
+  .lower { margin-top: 16px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: .84rem; }
+  th, td { padding: 9px 7px; text-align: left; border-bottom: 1px solid #e8ede8; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .notes { padding: 19px 2px 0; color: var(--muted); font-size: .82rem; line-height: 1.65; }
+  .notes p + p { margin-top: 6px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+  @media(max-width: 850px) {
+    .shell { width: calc(100% - 32px); }
+    .grid, .lower { grid-template-columns: 1fr; }
+  }
+  @media(max-width: 560px) {
+    .hero { padding: 24px 0 28px; }
+    .filters label { flex: 1 1 100%; }
+    select { width: 100%; }
+    .metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .metric:first-child { grid-column: 1 / -1; }
+    .metric, .panel { padding: 13px; }
+    .point-value { font-size: .65rem; }
+    .scale { width: 1.75rem; font-size: .66rem; }
+    #acoes .rank-label { display: grid; gap: 3px; }
+    .stack { width: 72%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="shell hero">
+    <p class="eyebrow">Curitiba • Agosto a outubro de 2026</p>
+    <h1>Para onde vai o dinheiro de Curitiba?</h1>
+    <p>Pagamentos municipais em saúde, educação e transporte coletivo urbano.</p>
+  </div>
+</header>
+<main class="shell">
+  <div class="filters" role="group" aria-label="Filtros da análise">
+    <label>Área <select id="area"></select></label>
+    <label>Mês <select id="periodo"></select></label>
+    <button class="reset" type="button" id="limpar">Limpar filtros</button>
+  </div>
+  <p class="sr-only" id="estado" aria-live="polite"></p>
+  <div class="metrics" aria-label="Indicadores da seleção">
+    <div class="metric"><span>Valor bruto pago</span><strong id="total"></strong></div>
+    <div class="metric"><span>Pagamentos registrados</span><strong id="quantidade"></strong></div>
+    <div class="metric"><span>Parcela do recorte completo</span><strong id="participacao"></strong></div>
+  </div>
+  <div class="grid">
+    <section class="panel" aria-labelledby="titulo-mensal">
+      <h2 id="titulo-mensal">Evolução mensal</h2>
+      <p class="sub">Valores em milhões de reais. Selecione uma barra para explorar o mês.</p>
+      <div class="legend" id="legenda"></div>
+      <div class="chart">
+        <div class="scale" id="escala" aria-hidden="true"></div>
+        <div class="plot" id="grafico" role="group" aria-label="Pagamentos por mês"></div>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="titulo-grupos">
+      <h2 id="titulo-grupos">Composição dos pagamentos</h2>
+      <p class="sub">Participação de cada grupo de despesa no valor selecionado.</p>
+      <ul class="composition" id="grupos"></ul>
+    </section>
+  </div>
+  <div class="grid lower">
+    <section class="panel" aria-labelledby="titulo-acoes">
+      <h2 id="titulo-acoes">Ações com maior valor pago</h2>
+      <p class="sub">As cinco maiores ações orçamentárias da seleção.</p>
+      <ol class="composition" id="acoes"></ol>
+    </section>
+    <section class="panel" aria-labelledby="titulo-conferencia">
+      <h2 id="titulo-conferencia">Valores por mês e área</h2>
+      <div class="scroll">
+        <table>
+          <thead><tr><th scope="col">Mês</th><th scope="col">Área</th><th class="num" scope="col">Valor pago</th></tr></thead>
+          <tbody id="tabela"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <footer class="notes">
+    <p>Valores em reais correntes, antes da dedução de devoluções. Saúde e Educação seguem as funções 10 e 12. Transporte coletivo urbano segue a subfunção 453 de Urbanismo.</p>
+    <p>Base tratada na Etapa 2 a partir da edição de 01/11/2026. <a href="https://dadosabertos.curitiba.pr.gov.br/conjuntodado/detalhe?chave=5DDFFBE8-313B-4D94-A862-73AB74B3817C">Fonte oficial da Prefeitura de Curitiba</a></p>
+  </footer>
+</main>
+<script type="application/json" id="dados">[{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE PARA A EDUCAÇÃO BÁSICA","centavos":202902484,"quantidade":5},{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE PARA A EDUCAÇÃO BÁSICA - SME","centavos":133672840,"quantidade":4},{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"ELABORAÇÃO DE ESTUDOS, PROJETOS E PLANOS - EXPANSÃO DO ATENDIMENTO EDUCACIONAL","centavos":995904,"quantidade":1},{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE CENTROS DE APOIO ESTRATÉGICOS EDUCACIONAIS","centavos":81605303,"quantidade":3},{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE CENTROS DE APOIO, PESQUISA E FORMAÇÃO ESTRATÉGICAS EDUCACIONAIS","centavos":3171160,"quantidade":2},{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"IMPLANTAÇÃO, REFORMA E/OU AMPLIAÇÃO DE CENTRO MUNICIPAL DE ATENDIMENTO EDUCACIONAL ESPECIALIZADO - CMAEE","centavos":13646079,"quantidade":2},{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"REFORMA E AMPLIAÇÃO DE CENTROS MUNICIPAIS DE EDUCAÇÃO INFANTIL - CMEIs","centavos":243194621,"quantidade":12},{"mes":"2026-08","area":"Educação","grupo":"Investimentos","acao":"REFORMA E AMPLIAÇÃO DE ESCOLAS MUNICIPAIS","centavos":256181790,"quantidade":14},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DA EDUCAÇÃO INFANTIL, POR MEIO DA PRESTAÇÃO DE SERVIÇOS COM ENTIDADES PRIVADAS","centavos":1390120721,"quantidade":188},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO DE JOVENS E ADULTOS","centavos":3458495,"quantidade":3},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO ESPECIAL - SME","centavos":31948419,"quantidade":3},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL","centavos":201319598,"quantidade":13},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL","centavos":487889729,"quantidade":7},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - SME","centavos":44400288,"quantidade":4},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIÇOS DE PATRULHAMENTO OSTENSIVO, EFETUADO PELA GUARDA MUNICIPAL, NA REDE MUNICIPAL DE ENSINO BÁSICO","centavos":6352878,"quantidade":3},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"CAPACITAÇÃO DO QUADRO DE PROFISSIONAIS DA EDUCAÇÃO","centavos":1466162,"quantidade":6},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"CONSERVAÇÃO E MANUTENÇÃO DOS PRÓPRIOS MUNICIPAIS, DESTINADOS À EDUCAÇÃO BÁSICA","centavos":329921616,"quantidade":36},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"GESTÃO DOS RECURSOS DESTINADOS AO CONSELHO MUNICIPAL DA EDUCAÇÃO","centavos":5500000,"quantidade":5},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO","centavos":3243934347,"quantidade":232},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO, COM RECURSOS DO FUNDEB - 30%","centavos":613043107,"quantidade":9},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO, COM RECURSOS DO FUNDEB - 40%","centavos":100000,"quantidade":1},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA ESTRUTURA FUNCIONAL - SME","centavos":148599170,"quantidade":81},{"mes":"2026-08","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DO VALE CRECHE","centavos":86520000,"quantidade":1},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO DE JOVENS E ADULTOS","centavos":26849829,"quantidade":6},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO ESPECIAL - SME","centavos":413483242,"quantidade":10},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL","centavos":1376037289,"quantidade":23},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL - FUNDEB 70%","centavos":1458900851,"quantidade":12},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL","centavos":1613276039,"quantidade":30},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL - FUNDEB 70%","centavos":3168459204,"quantidade":12},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - SME","centavos":482872706,"quantidade":36},{"mes":"2026-08","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIÇOS DE PATRULHAMENTO OSTENSIVO, EFETUADO PELA GUARDA MUNICIPAL, NA REDE MUNICIPAL DE ENSINO BÁSICO","centavos":60818121,"quantidade":10},{"mes":"2026-08","area":"Saúde","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE - FMS","centavos":66847991,"quantidade":16},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - FMS","centavos":192124514,"quantidade":9},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"CONSERVAÇÃO E MANUTENÇÃO DOS PRÓPRIOS MUNICIPAIS, DESTINADOS À ÁREA DE SAÚDE","centavos":168342274,"quantidade":17},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"CUMPRIMENTO DE ORDENS JUDICIAIS - FMS","centavos":3258400,"quantidade":2},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"DIVULGAÇÃO DAS AÇÕES DE GOVERNO E PUBLICIDADE INSTITUCIONAL - FMS","centavos":103950,"quantidade":2},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"GESTÃO DOS RECURSOS DESTINADOS AO CONSELHO MUNICIPAL DA SAÚDE","centavos":119200,"quantidade":1},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"IMPLEMENTAÇÃO E MANUTENÇÃO DA POLÍTICA DE SAÚDE AMBIENTAL E VIGILÂNCIA SANITÁRIA","centavos":115495134,"quantidade":24},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"IMPLEMENTAÇÃO E MANUTENÇÃO DO CONTROLE EPIDEMIOLÓGICO","centavos":26612663,"quantidade":10},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA ESTRUTURA FUNCIONAL - FMS","centavos":91000,"quantidade":5},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO E IMPLEMENTAÇÃO DOS PROGRAMAS DE SAÚDE DISPONIBILIZADOS À POPULAÇÃO","centavos":21378901923,"quantidade":572},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO E IMPLEMENTAÇÃO DOS PROGRAMAS DE SAÚDE DISPONIBILIZADOS Á POPULAÇÃO - FMS","centavos":1500315331,"quantidade":264},{"mes":"2026-08","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"PROMOÇÃO DA ASSISTÊNCIA FARMACÊUTICA POR MEIO DA AQUISIÇÃO E DISTRIBUIÇÃO DE INSUMOS E MEDICAMENTOS DO COMPONENTE BÁSICO","centavos":425445210,"quantidade":326},{"mes":"2026-08","area":"Saúde","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - FMS","centavos":4833230844,"quantidade":86},{"mes":"2026-08","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"EXECUÇÃO DE OBRAS DE CIRCULAÇÃO EM VIAS DO MUNICÍPIO - LINHA VERDE","centavos":203391269,"quantidade":5},{"mes":"2026-08","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS E AÇÕES PARA A MELHORIA DO TRANSPORTE COLETIVO","centavos":74279931,"quantidade":1},{"mes":"2026-08","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS PARA A AMPLIAÇÃO DA CAPACIDADE DA LINHA INTER 2 - SMOP","centavos":1995148214,"quantidade":11},{"mes":"2026-08","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS PARA O AUMENTO DA CAPACIDADE E VELOCIDADE - BRT","centavos":488653139,"quantidade":10},{"mes":"2026-08","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"REALIZAÇÃO DE SUPERVISÃO DE OBRAS - PAC 2 - MOBILIDADE URBANA","centavos":20640411,"quantidade":4},{"mes":"2026-08","area":"Transporte coletivo urbano","grupo":"Outras Despesas Correntes","acao":"APORTE PARA O EQUILÍBRIO TARIFÁRIO","centavos":3286427224,"quantidade":30},{"mes":"2026-08","area":"Transporte coletivo urbano","grupo":"Outras Despesas Correntes","acao":"GERENCIAMENTO E MANUTENÇÃO DO SISTEMA DE TRANSPORTE COLETIVO DO MUNICÍPIO","centavos":397693965,"quantidade":76},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE PARA A EDUCAÇÃO BÁSICA","centavos":196824857,"quantidade":4},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE PARA A EDUCAÇÃO BÁSICA - SME","centavos":40420613,"quantidade":3},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"ELABORAÇÃO DE ESTUDOS, PROJETOS E PLANOS - EXPANSÃO DO ATENDIMENTO EDUCACIONAL","centavos":1462100,"quantidade":1},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE CENTROS DE APOIO ESTRATÉGICOS EDUCACIONAIS","centavos":8606773,"quantidade":1},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE CENTROS DE APOIO, PESQUISA E FORMAÇÃO ESTRATÉGICAS EDUCACIONAIS","centavos":716654,"quantidade":1},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"IMPLANTAÇÃO, REFORMA E/OU AMPLIAÇÃO DE CENTRO MUNICIPAL DE ATENDIMENTO EDUCACIONAL ESPECIALIZADO - CMAEE","centavos":5635402,"quantidade":1},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"REFORMA E AMPLIAÇÃO DE CENTROS MUNICIPAIS DE EDUCAÇÃO INFANTIL - CMEIs","centavos":321430513,"quantidade":12},{"mes":"2026-09","area":"Educação","grupo":"Investimentos","acao":"REFORMA E AMPLIAÇÃO DE ESCOLAS MUNICIPAIS","centavos":487324060,"quantidade":22},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DA EDUCAÇÃO INFANTIL, POR MEIO DA PRESTAÇÃO DE SERVIÇOS COM ENTIDADES PRIVADAS","centavos":2348777119,"quantidade":341},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO DE JOVENS E ADULTOS","centavos":6028957,"quantidade":3},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO ESPECIAL - SME","centavos":59354862,"quantidade":3},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL","centavos":367536716,"quantidade":14},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL","centavos":918104050,"quantidade":9},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - SME","centavos":54984616,"quantidade":5},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIÇOS DE PATRULHAMENTO OSTENSIVO, EFETUADO PELA GUARDA MUNICIPAL, NA REDE MUNICIPAL DE ENSINO BÁSICO","centavos":7703472,"quantidade":4},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"CAPACITAÇÃO DO QUADRO DE PROFISSIONAIS DA EDUCAÇÃO","centavos":3175562,"quantidade":14},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"CONSERVAÇÃO E MANUTENÇÃO DOS PRÓPRIOS MUNICIPAIS, DESTINADOS À EDUCAÇÃO BÁSICA","centavos":292516402,"quantidade":23},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"DIVULGAÇÃO DAS AÇÕES DE GOVERNO E PUBLICIDADE INSTITUCIONAL - SME","centavos":113812754,"quantidade":21},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"GESTÃO DOS RECURSOS DESTINADOS AO CONSELHO MUNICIPAL DA EDUCAÇÃO","centavos":341171,"quantidade":2},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO","centavos":5001998801,"quantidade":254},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO, COM RECURSOS DO FUNDEB - 30%","centavos":234887412,"quantidade":9},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO, COM RECURSOS DO FUNDEB - 40%","centavos":474000,"quantidade":4},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA ESTRUTURA FUNCIONAL - SME","centavos":130188032,"quantidade":81},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DO REPASSE AO FUNDO ROTATIVO DA EDUCAÇÃO","centavos":594235400,"quantidade":8},{"mes":"2026-09","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DO VALE CRECHE","centavos":110250000,"quantidade":1},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO DE JOVENS E ADULTOS","centavos":31349237,"quantidade":6},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO ESPECIAL - SME","centavos":469706278,"quantidade":11},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL","centavos":1380842434,"quantidade":24},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL - FUNDEB 70%","centavos":1482438552,"quantidade":11},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL","centavos":2007700749,"quantidade":28},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL - FUNDEB 70%","centavos":3085640429,"quantidade":12},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - SME","centavos":512264016,"quantidade":29},{"mes":"2026-09","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIÇOS DE PATRULHAMENTO OSTENSIVO, EFETUADO PELA GUARDA MUNICIPAL, NA REDE MUNICIPAL DE ENSINO BÁSICO","centavos":66332407,"quantidade":10},{"mes":"2026-09","area":"Saúde","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE - FMS","centavos":25525158,"quantidade":12},{"mes":"2026-09","area":"Saúde","grupo":"Investimentos","acao":"TRANSFERÊNCIA DE RECURSOS ÀS ORGANIZAÇÕES DA SOCIEDADE CIVIL, PARA SERVIÇO DE ACOLHIMENTO INSTITUCIONAL, NA ÁREA DA SAÚDE - FMS","centavos":310000000,"quantidade":4},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - FMS","centavos":281367248,"quantidade":14},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"CONSERVAÇÃO E MANUTENÇÃO DOS PRÓPRIOS MUNICIPAIS, DESTINADOS À ÁREA DE SAÚDE","centavos":227337828,"quantidade":26},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"CUMPRIMENTO DE ORDENS JUDICIAIS - FMS","centavos":8587736,"quantidade":2},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"DIVULGAÇÃO DAS AÇÕES DE GOVERNO E PUBLICIDADE INSTITUCIONAL - FMS","centavos":2114700,"quantidade":8},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"GESTÃO DOS RECURSOS DESTINADOS AO CONSELHO MUNICIPAL DA SAÚDE","centavos":29686,"quantidade":2},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"IMPLEMENTAÇÃO E MANUTENÇÃO DA POLÍTICA DE SAÚDE AMBIENTAL E VIGILÂNCIA SANITÁRIA","centavos":73108318,"quantidade":21},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"IMPLEMENTAÇÃO E MANUTENÇÃO DO CONTROLE EPIDEMIOLÓGICO","centavos":2034916,"quantidade":5},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA ESTRUTURA FUNCIONAL - FMS","centavos":4417810,"quantidade":3},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO E IMPLEMENTAÇÃO DOS PROGRAMAS DE SAÚDE DISPONIBILIZADOS À POPULAÇÃO","centavos":19159413869,"quantidade":451},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO E IMPLEMENTAÇÃO DOS PROGRAMAS DE SAÚDE DISPONIBILIZADOS Á POPULAÇÃO - FMS","centavos":1660889729,"quantidade":282},{"mes":"2026-09","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"PROMOÇÃO DA ASSISTÊNCIA FARMACÊUTICA POR MEIO DA AQUISIÇÃO E DISTRIBUIÇÃO DE INSUMOS E MEDICAMENTOS DO COMPONENTE BÁSICO","centavos":247266215,"quantidade":216},{"mes":"2026-09","area":"Saúde","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - FMS","centavos":4893743750,"quantidade":77},{"mes":"2026-09","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"EXECUÇÃO DE OBRAS DE CIRCULAÇÃO EM VIAS DO MUNICÍPIO - LINHA VERDE","centavos":287898697,"quantidade":5},{"mes":"2026-09","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS E AÇÕES PARA A MELHORIA DO TRANSPORTE COLETIVO","centavos":74279931,"quantidade":1},{"mes":"2026-09","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS PARA A AMPLIAÇÃO DA CAPACIDADE DA LINHA INTER 2 - SMOP","centavos":2045450881,"quantidade":14},{"mes":"2026-09","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS PARA O AUMENTO DA CAPACIDADE E VELOCIDADE - BRT","centavos":578108132,"quantidade":7},{"mes":"2026-09","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"REALIZAÇÃO DE SUPERVISÃO DE OBRAS - PAC 2 - MOBILIDADE URBANA","centavos":18386040,"quantidade":4},{"mes":"2026-09","area":"Transporte coletivo urbano","grupo":"Outras Despesas Correntes","acao":"APORTE PARA O EQUILÍBRIO TARIFÁRIO","centavos":3548900445,"quantidade":37},{"mes":"2026-09","area":"Transporte coletivo urbano","grupo":"Outras Despesas Correntes","acao":"GERENCIAMENTO E MANUTENÇÃO DO SISTEMA DE TRANSPORTE COLETIVO DO MUNICÍPIO","centavos":408177910,"quantidade":69},{"mes":"2026-10","area":"Educação","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE PARA A EDUCAÇÃO BÁSICA","centavos":92648165,"quantidade":4},{"mes":"2026-10","area":"Educação","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE PARA A EDUCAÇÃO BÁSICA - SME","centavos":98668086,"quantidade":6},{"mes":"2026-10","area":"Educação","grupo":"Investimentos","acao":"CONSTRUÇÃO E/OU REVITALIZAÇÃO DE QUADRAS EM ESCOLAS MUNICIPAIS","centavos":17115284,"quantidade":3},{"mes":"2026-10","area":"Educação","grupo":"Investimentos","acao":"REFORMA E AMPLIAÇÃO DE CENTROS MUNICIPAIS DE EDUCAÇÃO INFANTIL - CMEIs","centavos":221472600,"quantidade":14},{"mes":"2026-10","area":"Educação","grupo":"Investimentos","acao":"REFORMA E AMPLIAÇÃO DE ESCOLAS MUNICIPAIS","centavos":269986598,"quantidade":18},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DA EDUCAÇÃO INFANTIL, POR MEIO DA PRESTAÇÃO DE SERVIÇOS COM ENTIDADES PRIVADAS","centavos":2258454573,"quantidade":265},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO DE JOVENS E ADULTOS","centavos":5254772,"quantidade":3},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO ESPECIAL - SME","centavos":56617629,"quantidade":3},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL","centavos":337724358,"quantidade":13},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL","centavos":866381496,"quantidade":9},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - SME","centavos":49236218,"quantidade":5},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIÇOS DE PATRULHAMENTO OSTENSIVO, EFETUADO PELA GUARDA MUNICIPAL, NA REDE MUNICIPAL DE ENSINO BÁSICO","centavos":7116966,"quantidade":3},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"CAPACITAÇÃO DO QUADRO DE PROFISSIONAIS DA EDUCAÇÃO","centavos":2200000,"quantidade":12},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"CONSERVAÇÃO E MANUTENÇÃO DOS PRÓPRIOS MUNICIPAIS, DESTINADOS À EDUCAÇÃO BÁSICA","centavos":324661828,"quantidade":48},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"DIVULGAÇÃO DAS AÇÕES DE GOVERNO E PUBLICIDADE INSTITUCIONAL - SME","centavos":65685351,"quantidade":96},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"GESTÃO DOS RECURSOS DESTINADOS AO CONSELHO MUNICIPAL DA EDUCAÇÃO","centavos":2882342,"quantidade":6},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO","centavos":7017970563,"quantidade":275},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO, COM RECURSOS DO FUNDEB - 30%","centavos":540366801,"quantidade":17},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA EDUCAÇÃO BÁSICA, POR MEIO DA POLÍTICA MUNICIPAL DE ENSINO, COM RECURSOS DO FUNDEB - 40%","centavos":69125539,"quantidade":8},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DA ESTRUTURA FUNCIONAL - SME","centavos":213229930,"quantidade":59},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DO REPASSE AO FUNDO ROTATIVO DA EDUCAÇÃO","centavos":596766600,"quantidade":10},{"mes":"2026-10","area":"Educação","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO DO VALE CRECHE","centavos":273737787,"quantidade":11},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO DE JOVENS E ADULTOS","centavos":29826233,"quantidade":6},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO ESPECIAL - SME","centavos":467484917,"quantidade":10},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL","centavos":1650938437,"quantidade":23},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DA EDUCAÇÃO INFANTIL - FUNDEB 70%","centavos":1157519231,"quantidade":10},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL","centavos":2230269867,"quantidade":27},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES DO ENSINO FUNDAMENTAL - FUNDEB 70%","centavos":2952672055,"quantidade":11},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - SME","centavos":537064114,"quantidade":38},{"mes":"2026-10","area":"Educação","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIÇOS DE PATRULHAMENTO OSTENSIVO, EFETUADO PELA GUARDA MUNICIPAL, NA REDE MUNICIPAL DE ENSINO BÁSICO","centavos":65582891,"quantidade":10},{"mes":"2026-10","area":"Saúde","grupo":"Investimentos","acao":"AQUISIÇÃO E REPOSIÇÃO DE EQUIPAMENTOS E MATERIAL PERMANENTE - FMS","centavos":35399144,"quantidade":27},{"mes":"2026-10","area":"Saúde","grupo":"Investimentos","acao":"TRANSFERÊNCIA DE RECURSOS ÀS ORGANIZAÇÕES DA SOCIEDADE CIVIL, PARA SERVIÇO DE ACOLHIMENTO INSTITUCIONAL, NA ÁREA DA SAÚDE - FMS","centavos":230000000,"quantidade":3},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - FMS","centavos":238847136,"quantidade":12},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"CONSERVAÇÃO E MANUTENÇÃO DOS PRÓPRIOS MUNICIPAIS, DESTINADOS À ÁREA DE SAÚDE","centavos":183092347,"quantidade":27},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"CUMPRIMENTO DE ORDENS JUDICIAIS - FMS","centavos":240000,"quantidade":1},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"DIVULGAÇÃO DAS AÇÕES DE GOVERNO E PUBLICIDADE INSTITUCIONAL - FMS","centavos":195245,"quantidade":2},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"IMPLEMENTAÇÃO E MANUTENÇÃO DA POLÍTICA DE SAÚDE AMBIENTAL E VIGILÂNCIA SANITÁRIA","centavos":51057447,"quantidade":15},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"IMPLEMENTAÇÃO E MANUTENÇÃO DO CONTROLE EPIDEMIOLÓGICO","centavos":37716580,"quantidade":13},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO E IMPLEMENTAÇÃO DOS PROGRAMAS DE SAÚDE DISPONIBILIZADOS À POPULAÇÃO","centavos":24394815458,"quantidade":466},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"MANUTENÇÃO E IMPLEMENTAÇÃO DOS PROGRAMAS DE SAÚDE DISPONIBILIZADOS Á POPULAÇÃO - FMS","centavos":1993937242,"quantidade":317},{"mes":"2026-10","area":"Saúde","grupo":"Outras Despesas Correntes","acao":"PROMOÇÃO DA ASSISTÊNCIA FARMACÊUTICA POR MEIO DA AQUISIÇÃO E DISTRIBUIÇÃO DE INSUMOS E MEDICAMENTOS DO COMPONENTE BÁSICO","centavos":476501115,"quantidade":235},{"mes":"2026-10","area":"Saúde","grupo":"Pessoal e Encargos Sociais","acao":"ATENDIMENTO DE DESPESA COM A FOLHA DE PAGAMENTO DOS SERVIDORES MUNICIPAIS DE CURITIBA - FMS","centavos":4931492180,"quantidade":88},{"mes":"2026-10","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"EXECUÇÃO DE OBRAS DE CIRCULAÇÃO EM VIAS DO MUNICÍPIO - LINHA VERDE","centavos":813437398,"quantidade":7},{"mes":"2026-10","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS E AÇÕES PARA A MELHORIA DO TRANSPORTE COLETIVO","centavos":74279931,"quantidade":1},{"mes":"2026-10","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS PARA A AMPLIAÇÃO DA CAPACIDADE DA LINHA INTER 2 - SMOP","centavos":2588789417,"quantidade":14},{"mes":"2026-10","area":"Transporte coletivo urbano","grupo":"Investimentos","acao":"IMPLANTAÇÃO DE OBRAS PARA O AUMENTO DA CAPACIDADE E VELOCIDADE - BRT","centavos":244639526,"quantidade":6},{"mes":"2026-10","area":"Transporte coletivo urbano","grupo":"Outras Despesas Correntes","acao":"APORTE PARA O EQUILÍBRIO TARIFÁRIO","centavos":1100000000,"quantidade":7},{"mes":"2026-10","area":"Transporte coletivo urbano","grupo":"Outras Despesas Correntes","acao":"GERENCIAMENTO E MANUTENÇÃO DO SISTEMA DE TRANSPORTE COLETIVO DO MUNICÍPIO","centavos":161310285,"quantidade":29}]</script>
+<script>
+  "use strict";
+  const dados = JSON.parse(document.getElementById("dados").textContent);
+  const areas = [
+    { nome: "Saúde", cor: "health" },
+    { nome: "Educação", cor: "education" },
+    { nome: "Transporte coletivo urbano", cor: "transport" },
+  ];
+  const meses = [
+    { codigo: "2026-08", nome: "Agosto", curto: "Ago" },
+    { codigo: "2026-09", nome: "Setembro", curto: "Set" },
+    { codigo: "2026-10", nome: "Outubro", curto: "Out" },
+  ];
+  const dinheiro = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const numero = new Intl.NumberFormat("pt-BR");
+  const milhoes = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+  const percentual = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 });
+  const porId = (id) => document.getElementById(id);
+  const filtroArea = porId("area");
+  const filtroMes = porId("periodo");
+  const soma = (linhas) => linhas.reduce((total, linha) => total + linha.centavos, 0);
+  const totalBase = soma(dados);
+  const moeda = (centavos) => dinheiro.format(centavos / 100);
+
+  function criar(tag, classe, texto) {
+    const elemento = document.createElement(tag);
+    if (classe) elemento.className = classe;
+    if (texto !== undefined) elemento.textContent = texto;
+    return elemento;
+  }
+
+  function opcoes(select, todas, itens) {
+    select.add(new Option(todas, ""));
+    for (const item of itens) {
+      select.add(new Option(item.nome, item.codigo ?? item.nome));
+    }
+  }
+
+  function porMesEArea(linhas, areasVisiveis) {
+    return meses.map((mes) => ({
+      ...mes,
+      valores: areasVisiveis.map((area) => ({
+        ...area,
+        centavos: soma(linhas.filter((linha) => linha.mes === mes.codigo && linha.area === area.nome)),
+      })),
+    }));
+  }
+
+  function desenharGrafico(series, areasVisiveis) {
+    const maior = Math.max(...series.map((mes) => soma(mes.valores)));
+    const passo = [10, 20, 25, 50, 75, 100, 150, 200, 250, 300].find((valor) =>
+      valor * 400_000_000 >= maior
+    );
+    const teto = passo * 400_000_000;
+    const legenda = areasVisiveis.map((area) => {
+      const item = criar("span");
+      item.append(criar("i", "swatch " + area.cor), document.createTextNode(area.nome));
+      return item;
+    });
+    porId("legenda").replaceChildren(...legenda);
+    const escala = porId("escala");
+    escala.replaceChildren(...[4, 3, 2, 1, 0].map((n, indice) => {
+      const marca = criar("span", "", numero.format(n * passo));
+      marca.style.top = (indice * 25) + "%";
+      return marca;
+    }));
+    const linhas = criar("div", "gridlines");
+    linhas.setAttribute("aria-hidden", "true");
+    for (let i = 0; i <= 4; i++) linhas.append(criar("span"));
+    const botoes = series.map((mes) => {
+      const valor = soma(mes.valores);
+      const botao = criar("button", "month");
+      const ativo = filtroMes.value === mes.codigo;
+      botao.type = "button";
+      botao.dataset.mes = mes.codigo;
+      botao.dataset.dim = Boolean(filtroMes.value && !ativo);
+      botao.setAttribute("aria-pressed", String(ativo));
+      const descricao = mes.valores.map((area) => area.nome + " " + moeda(area.centavos)).join(", ");
+      botao.setAttribute("aria-label", mes.nome + ", " + descricao);
+      botao.title = mes.nome + " · " + descricao;
+      const espaco = criar("div", "bar-space");
+      const pilha = criar("div", "stack");
+      pilha.style.height = (valor / teto * 100) + "%";
+      for (const area of mes.valores) {
+        if (!area.centavos) continue;
+        const parte = criar("div", area.cor);
+        parte.style.flexGrow = area.centavos;
+        pilha.append(parte);
+      }
+      const rotulo = criar("span", "point-value", milhoes.format(valor / 100_000_000) + " mi");
+      rotulo.style.bottom = "min(calc(100% - 1.1rem), " + (valor / teto * 100) + "%)";
+      espaco.append(pilha, rotulo);
+      botao.append(espaco, criar("span", "month-name", mes.curto));
+      return botao;
+    });
+    porId("grafico").replaceChildren(linhas, ...botoes);
+  }
+
+  function agrupar(linhas, chave, campos) {
+    const grupos = new Map();
+    for (const linha of linhas) {
+      const id = chave(linha);
+      if (!grupos.has(id)) grupos.set(id, { ...campos(linha), centavos: 0 });
+      grupos.get(id).centavos += linha.centavos;
+    }
+    return [...grupos.values()].sort((a, b) => b.centavos - a.centavos);
+  }
+
+  function renderizarGrupos(linhas, total) {
+    const grupos = agrupar(linhas, (linha) => linha.grupo, (linha) => ({ nome: linha.grupo }));
+    const itens = grupos.map((grupo) => {
+      const parte = grupo.centavos / total;
+      const item = criar("li");
+      const rotulo = criar("div", "rank-label");
+      rotulo.append(criar("span", "", grupo.nome), criar("strong", "", percentual.format(parte)));
+      const trilha = criar("div", "rail");
+      const barra = criar("span");
+      barra.style.width = (parte * 100) + "%";
+      trilha.append(barra);
+      item.append(rotulo, trilha, criar("p", "rank-value", moeda(grupo.centavos)));
+      return item;
+    });
+    porId("grupos").replaceChildren(...itens);
+  }
+
+  function renderizarAcoes(linhas) {
+    const acoes = agrupar(linhas,
+      (linha) => JSON.stringify([linha.area, linha.acao]),
+      (linha) => ({ area: linha.area, nome: linha.acao })
+    ).slice(0, 5);
+    const itens = acoes.map((acao) => {
+      const item = criar("li");
+      const rotulo = criar("div", "rank-label");
+      const nome = criar("span", "", acao.nome);
+      nome.append(criar("span", "rank-area", acao.area));
+      rotulo.append(nome, criar("strong", "", moeda(acao.centavos)));
+      item.append(rotulo);
+      return item;
+    });
+    porId("acoes").replaceChildren(...itens);
+  }
+
+  function renderizarTabela(series) {
+    const linhas = [];
+    for (const mes of series) {
+      if (filtroMes.value && filtroMes.value !== mes.codigo) continue;
+      for (const area of mes.valores) {
+        const tr = criar("tr");
+        tr.append(criar("td", "", mes.curto + "/26"), criar("td", "", area.nome),
+          criar("td", "num", moeda(area.centavos)));
+        linhas.push(tr);
+      }
+    }
+    porId("tabela").replaceChildren(...linhas);
+  }
+
+  function atualizar() {
+    const areasVisiveis = areas.filter((area) => !filtroArea.value || area.nome === filtroArea.value);
+    const baseArea = dados.filter((linha) => !filtroArea.value || linha.area === filtroArea.value);
+    const selecao = baseArea.filter((linha) => !filtroMes.value || linha.mes === filtroMes.value);
+    const total = soma(selecao);
+    const qtd = selecao.reduce((acc, linha) => acc + linha.quantidade, 0);
+    porId("total").textContent = moeda(total);
+    porId("quantidade").textContent = numero.format(qtd);
+    porId("participacao").textContent = percentual.format(total / totalBase);
+    porId("estado").textContent = numero.format(qtd) + " pagamentos, " + moeda(total);
+    const series = porMesEArea(baseArea, areasVisiveis);
+    desenharGrafico(series, areasVisiveis);
+    renderizarGrupos(selecao, total);
+    renderizarAcoes(selecao);
+    renderizarTabela(series);
+  }
+
+  opcoes(filtroArea, "Todas as áreas", areas);
+  opcoes(filtroMes, "Todos os meses", meses);
+  filtroArea.addEventListener("change", atualizar);
+  filtroMes.addEventListener("change", atualizar);
+  porId("limpar").addEventListener("click", () => {
+    filtroArea.value = "";
+    filtroMes.value = "";
+    atualizar();
+  });
+  porId("grafico").addEventListener("click", (evento) => {
+    const botao = evento.target.closest("[data-mes]");
+    if (!botao) return;
+    const mes = botao.dataset.mes;
+    filtroMes.value = filtroMes.value === mes ? "" : mes;
+    atualizar();
+    porId("grafico").querySelector('[data-mes="' + mes + '"]').focus();
+  });
+  atualizar();
+</script>
+</body>
+</html>

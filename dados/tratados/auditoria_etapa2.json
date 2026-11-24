@@ -1,0 +1,84 @@
+{
+  "arquivo_origem": "2026-11-01_Despesas_-_Base_de_Dados.csv",
+  "sha256_origem": "6a3eb604c6184e533891197d3e71a39658db7eef766b029e20bd1f69c39e1982",
+  "periodo": {
+    "inicio": "2026-08-01",
+    "fim_exclusivo": "2026-11-01"
+  },
+  "contagens": {
+    "linhas_lidas": 87868,
+    "fora_das_areas": 64682,
+    "duplicatas_exatas_no_recorte": 33,
+    "sem_tipo_de_transacao": 9186,
+    "outros_tipos_de_transacao": 7197,
+    "datas_ausentes_ou_invalidas": 0,
+    "pagamentos_fora_do_periodo": 0,
+    "valores_ausentes_ou_invalidos": 0,
+    "pagamentos_com_valor_zero": 0,
+    "pagamentos_exportados": 6770
+  },
+  "transacoes_excluidas_por_tipo": {
+    "Anulado de Empenho": 347,
+    "Liquidação de Empenho": 6752,
+    "Consignação de Empenho": 65,
+    "Devolvido de Empenho": 33
+  },
+  "descricoes_preenchidas": {},
+  "total_pago_reais": "1655422796.60",
+  "conferencia_por_mes_e_area": [
+    {
+      "mes": "2026-08",
+      "area": "Educação",
+      "pagamentos": 774,
+      "valor_pago_reais": "161306419.92"
+    },
+    {
+      "mes": "2026-08",
+      "area": "Saúde",
+      "pagamentos": 1334,
+      "valor_pago_reais": "287108884.34"
+    },
+    {
+      "mes": "2026-08",
+      "area": "Transporte coletivo urbano",
+      "pagamentos": 137,
+      "valor_pago_reais": "64662341.53"
+    },
+    {
+      "mes": "2026-09",
+      "area": "Educação",
+      "pagamentos": 972,
+      "valor_pago_reais": "203430644.00"
+    },
+    {
+      "mes": "2026-09",
+      "area": "Saúde",
+      "pagamentos": 1123,
+      "valor_pago_reais": "268958369.63"
+    },
+    {
+      "mes": "2026-09",
+      "area": "Transporte coletivo urbano",
+      "pagamentos": 137,
+      "valor_pago_reais": "69612020.36"
+    },
+    {
+      "mes": "2026-10",
+      "area": "Educação",
+      "pagamentos": 1023,
+      "valor_pago_reais": "224786612.31"
+    },
+    {
+      "mes": "2026-10",
+      "area": "Saúde",
+      "pagamentos": 1206,
+      "valor_pago_reais": "325732938.94"
+    },
+    {
+      "mes": "2026-10",
+      "area": "Transporte coletivo urbano",
+      "pagamentos": 64,
+      "valor_pago_reais": "49824565.57"
+    }
+  ]
+}
