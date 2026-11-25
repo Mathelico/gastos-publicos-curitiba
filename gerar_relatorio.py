@@ -25,6 +25,7 @@ MESES = ["2026-08", "2026-09", "2026-10"]
 ROTULOS = ["Agosto", "Setembro", "Outubro"]
 GRUPOS = ["Outras Despesas Correntes", "Pessoal e Encargos Sociais", "Investimentos"]
 CORES = ["#146656", "#3477a1", "#a65f16"]
+PROJETO = "https://github.com/Mathelico/gastos-publicos-curitiba"
 CATALOGO = "https://dadosabertos.curitiba.pr.gov.br/conjuntodado/detalhe?chave=5DDFFBE8-313B-4D94-A862-73AB74B3817C"
 ORIGEM = "https://mid-dadosabertos.curitiba.pr.gov.br/BaseReceitaDespesa/2026-11-01_Despesas_-_Base_de_Dados.csv"
 DICIONARIO = "https://mid-dadosabertos.curitiba.pr.gov.br/BaseReceitaDespesa/2025-06-18_Despesas_-_Dicionario_de_Dados.xlsx"
@@ -192,6 +193,7 @@ def gerar():
     markdown = "\n\n".join([
         "# Para onde vai o dinheiro de Curitiba?",
         "## Relatório técnico final\n\nAnálise de Dados Governamentais Abertos - 2º Bimestre\n\nPeríodo de agosto a outubro de 2026. Relatório de 24/11/2026.",
+        f"Projeto no GitHub: [{PROJETO}]({PROJETO})",
         "## 1. Introdução", introducao, perguntas,
         "## 2. Metodologia", metodo, tratamento, ferramentas,
         tabela_md(["Resultado do ETL", "Linhas"], linhas_etl),
@@ -248,6 +250,8 @@ def gerar():
     historia += [
         Paragraph("Para onde vai o dinheiro<br/>de Curitiba?", estilos["TituloPT"]),
         corpo("Relatório técnico final | Análise de Dados Governamentais Abertos | 24/11/2026"),
+        Paragraph(f'Projeto no GitHub<br/><link href="{PROJETO}" color="#146656">{PROJETO}</link>',
+                  estilos["PequenoPT"]),
         secao("1. Introdução"), corpo(introducao), corpo(perguntas),
         secao("2. Metodologia"), corpo(metodo), corpo(tratamento),
         tabela(["Resultado do ETL", "Linhas"], linhas_etl, [13.5 * cm, 3.5 * cm]),

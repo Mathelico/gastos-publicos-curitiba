@@ -6,6 +6,8 @@ Análise de Dados Governamentais Abertos - 2º Bimestre
 
 Período de agosto a outubro de 2026. Relatório de 24/11/2026.
 
+Projeto no GitHub: [https://github.com/Mathelico/gastos-publicos-curitiba](https://github.com/Mathelico/gastos-publicos-curitiba)
+
 ## 1. Introdução
 
 Este projeto examina a distribuição dos pagamentos municipais de Curitiba em saúde, educação e transporte coletivo urbano, entre agosto e outubro de 2026. A comparação procura tornar os registros de execução financeira mais acessíveis e relacioná-los a serviços presentes no cotidiano da população.
